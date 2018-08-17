@@ -10,7 +10,7 @@ export class Terminal {
   }
 
   andPlay(f) {
-    return new Some(this);
+    return this;
   }
 }
 

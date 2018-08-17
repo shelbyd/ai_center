@@ -1,20 +1,21 @@
-import {randomSample} from './utils.js';
 import {TicTacToe} from './games/tic_tac_toe.js';
 import {NonTerminal} from './game.js';
+import {RandomAgent} from './agents/random.js';
 
 let tic_tac_toe = new NonTerminal(new TicTacToe());
 
 function playerPlays(t, square) {
-  return t.andPlay(t => t.play('X', square)).expect(`Player played an invalid move ${square}`);
+  return t.andPlay(t => t.play('X', square).expect(`Player played an invalid move ${square}`));
 }
 
-function randomPlays(t) {
-  return t.andPlay(t => {
-    let unplayed = t.unplayed();
-    let square = randomSample(unplayed);
+let randomAgent = new RandomAgent();
 
-    return t.play('O', square);
-  }).unwrap();
+function agentPlays(t, agentId, agent) {
+  return t.andPlay(t => {
+    let action = agent.action(t);
+    return t.play(agentId, action)
+        .expect(`Agent ${agentId} chose an invalid action ${action}`);
+  });
 }
 
 function render() {
@@ -28,6 +29,8 @@ function render() {
   });
 }
 
+tic_tac_toe = playerPlays(tic_tac_toe, 0);
+tic_tac_toe = agentPlays(tic_tac_toe, 'O', randomAgent);
 render();
 
 document.getElementById('3t-play').addEventListener('click', (event) => {
@@ -36,6 +39,6 @@ document.getElementById('3t-play').addEventListener('click', (event) => {
   inputElement.value = '';
 
   tic_tac_toe = playerPlays(tic_tac_toe, parseInt(input));
-  tic_tac_toe = randomPlays(tic_tac_toe);
+  tic_tac_toe = agentPlays(tic_tac_toe, 'O', randomAgent);
   render();
 });
