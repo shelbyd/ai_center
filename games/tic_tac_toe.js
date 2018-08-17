@@ -28,7 +28,7 @@ export class TicTacToe {
 
   playRaw(pip, square) {
     let clone = this.clone();
-    if (!clone.unplayed().includes(square)) {
+    if (!clone.validActions().includes(square)) {
       return new None();
     }
 
@@ -42,14 +42,14 @@ export class TicTacToe {
       }
     }
 
-    if (clone.unplayed().length === 0) {
+    if (clone.validActions().length === 0) {
       return new Some(new Terminal(new None()));
     }
 
     return new Some(new NonTerminal(clone));
   }
 
-  unplayed() {
+  validActions() {
     return this.array.map((v, i) => [i, v]).filter(([_, v]) => v == '-').map(([i, _]) => i);
   }
 
@@ -78,20 +78,20 @@ import {test, assert, assertEq} from '../test.js';
 test('empty game can play anything', () => {
   let game = new TicTacToe();
 
-  assertEq(game.unplayed().length, 9);
+  assertEq(game.validActions().length, 9);
 });
 
 test('one move played can no longer play that move', () => {
   let game = new TicTacToe()
     .play(0).unwrap().nonTerminal();
 
-  assertEq(game.unplayed().length, 8);
-  assert(!game.unplayed().includes(0));
-  assert(game.unplayed().includes(1));
+  assertEq(game.validActions().length, 8);
+  assert(!game.validActions().includes(0));
+  assert(game.validActions().includes(1));
 
   game = game.play(1).unwrap().nonTerminal();
 
-  assert(!game.unplayed().includes(1));
+  assert(!game.validActions().includes(1));
 });
 
 test('attempting play over existing square is none', () => {
