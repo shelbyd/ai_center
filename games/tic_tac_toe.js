@@ -1,4 +1,4 @@
-import {Some, None} from '/option.js';
+import {Some, None} from '../option.js';
 
 export class TicTacToe {
   constructor() {
@@ -35,7 +35,7 @@ ${t[6]} ${t[7]} ${t[8]}`;
   }
 }
 
-import {test, assert, assertEq} from '/test.js';
+import {test, assert, assertEq} from '../test.js';
 
 test('empty game can play anything', () => {
   let game = new TicTacToe();

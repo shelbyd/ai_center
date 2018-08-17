@@ -1,4 +1,4 @@
-import {_} from '/third_party.js';
+import {_} from './third_party.js';
 let {isEqual} = _;
 
 let passedTests = 0;
