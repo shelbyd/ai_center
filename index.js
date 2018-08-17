@@ -29,8 +29,6 @@ function render() {
   });
 }
 
-tic_tac_toe = playerPlays(tic_tac_toe, 0);
-tic_tac_toe = agentPlays(tic_tac_toe, randomAgent);
 render();
 
 document.getElementById('3t-play').addEventListener('click', (event) => {
