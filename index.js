@@ -1,6 +1,7 @@
 import {TicTacToe} from './games/tic_tac_toe.js';
 import {NonTerminal} from './game.js';
 import {RandomAgent} from './agents/random.js';
+import {McAgent} from './agents/mc.js';
 
 let tic_tac_toe = new NonTerminal(new TicTacToe());
 
@@ -8,7 +9,7 @@ function playerPlays(t, square) {
   return t.andPlay(t => t.play(square).expect(`Player played an invalid move ${square}`));
 }
 
-let opponent = new RandomAgent();
+let opponent = new McAgent(100);
 
 function agentPlays(t, agent) {
   return t.andPlay(t => {
@@ -28,6 +29,11 @@ function render() {
     nonTerminal: (t) => t.textRepresentation(),
   });
 }
+
+// DO NOT SUBMIT
+// tic_tac_toe = playerPlays(tic_tac_toe, 0);
+// tic_tac_toe = agentPlays(tic_tac_toe, opponent);
+// END DO NOT SUBMIT
 
 render();
 

@@ -5,6 +5,10 @@ export class Terminal {
     this.winner = winner;
   }
 
+  maybeTerminal() {
+    return new Some(this);
+  }
+
   match(obj) {
     return obj.terminal(this.winner);
   }
