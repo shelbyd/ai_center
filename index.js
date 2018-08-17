@@ -8,7 +8,7 @@ function playerPlays(t, square) {
   return t.andPlay(t => t.play(square).expect(`Player played an invalid move ${square}`));
 }
 
-let randomAgent = new RandomAgent();
+let opponent = new RandomAgent();
 
 function agentPlays(t, agent) {
   return t.andPlay(t => {
@@ -37,6 +37,6 @@ document.getElementById('3t-play').addEventListener('click', (event) => {
   inputElement.value = '';
 
   tic_tac_toe = playerPlays(tic_tac_toe, parseInt(input));
-  tic_tac_toe = agentPlays(tic_tac_toe, randomAgent);
+  tic_tac_toe = agentPlays(tic_tac_toe, opponent);
   render();
 });
