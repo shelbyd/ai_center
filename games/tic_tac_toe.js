@@ -1,4 +1,19 @@
+import {dedup} from '../utils.js';
 import {Some, None} from '../option.js';
+import {NonTerminal, Terminal} from '../game.js';
+
+let winPatterns = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+
+  [0, 4, 8],
+  [2, 4, 6],
+];
 
 export class TicTacToe {
   constructor() {
@@ -9,12 +24,25 @@ export class TicTacToe {
 
   play(pip, square) {
     let clone = this.clone();
-    if (clone.array[square] !== '-') {
+    if (!clone.unplayed().includes(square)) {
       return new None();
     }
 
     clone.array[square] = pip;
-    return new Some(clone);
+
+    for (let pattern of winPatterns) {
+      let deduped = dedup(pattern.map(i => clone.array[i]));
+      let winner = deduped.andThen(v => v === '-' ? new None() : new Some(v));
+      if (winner.isSome()) {
+        return new Some(new Terminal(winner));
+      }
+    }
+
+    if (clone.unplayed().length === 0) {
+      return new Some(new Terminal(new None()));
+    }
+
+    return new Some(new NonTerminal(clone));
   }
 
   unplayed() {
@@ -44,19 +72,45 @@ test('empty game can play anything', () => {
 });
 
 test('one move played can no longer play that move', () => {
-  let game = new TicTacToe().play('X', 0).unwrap();
+  let game = new TicTacToe()
+    .play('X', 0).unwrap().nonTerminal();
 
   assertEq(game.unplayed().length, 8);
   assert(!game.unplayed().includes(0));
   assert(game.unplayed().includes(1));
 
-  game = game.play('O', 1).unwrap();
+  game = game.play('O', 1).unwrap().nonTerminal();
 
   assert(!game.unplayed().includes(1));
 });
 
 test('attempting play over existing square is none', () => {
-  let game = new TicTacToe().play('X', 0).unwrap();
+  let game = new TicTacToe().play('X', 0).unwrap().nonTerminal();
 
   assertEq(game.play('O', 0), new None());
+});
+
+test('X wins', () => {
+  let game = new TicTacToe()
+    .play('X', 0).unwrap().nonTerminal()
+    .play('X', 1).unwrap().nonTerminal()
+    .play('X', 2);
+
+  assertEq(game, new Some(new Terminal(new Some('X'))));
+});
+
+test('draw', () => {
+  let game = new TicTacToe()
+    .play('X', 0).unwrap().nonTerminal()
+    .play('X', 1).unwrap().nonTerminal()
+    .play('O', 2).unwrap().nonTerminal()
+    .play('O', 3).unwrap().nonTerminal()
+    .play('O', 4).unwrap().nonTerminal()
+    .play('X', 5).unwrap().nonTerminal()
+    .play('X', 6).unwrap().nonTerminal()
+    .play('X', 7).unwrap().nonTerminal()
+    .play('O', 8)
+  ;
+
+  assertEq(game, new Some(new Terminal(new None())));
 });

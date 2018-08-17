@@ -1,26 +1,33 @@
 import {randomSample} from './utils.js';
 import {TicTacToe} from './games/tic_tac_toe.js';
+import {NonTerminal} from './game.js';
 
-let tic_tac_toe = new TicTacToe();
+let tic_tac_toe = new NonTerminal(new TicTacToe());
 
 function playerPlays(t, square) {
-  return t.play('X', square).unwrap();
+  return t.andPlay(t => t.play('X', square)).expect(`Player played an invalid move ${square}`);
 }
 
 function randomPlays(t) {
-  let unplayed = t.unplayed();
-  let square = randomSample(unplayed);
+  return t.andPlay(t => {
+    let unplayed = t.unplayed();
+    let square = randomSample(unplayed);
 
-  return t.play('O', square).unwrap();
+    return t.play('O', square);
+  }).unwrap();
 }
 
 function render() {
   let element = document.getElementById('3t');
-  element.textContent = tic_tac_toe.textRepresentation();
+  element.textContent = tic_tac_toe.match({
+    terminal: (w) => w.match({
+      some: (w) => `${w} wins`,
+      none: () => 'draw',
+    }),
+    nonTerminal: (t) => t.textRepresentation(),
+  });
 }
 
-tic_tac_toe = playerPlays(tic_tac_toe, 3);
-tic_tac_toe = randomPlays(tic_tac_toe);
 render();
 
 document.getElementById('3t-play').addEventListener('click', (event) => {
