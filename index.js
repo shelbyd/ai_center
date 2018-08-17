@@ -5,16 +5,16 @@ import {RandomAgent} from './agents/random.js';
 let tic_tac_toe = new NonTerminal(new TicTacToe());
 
 function playerPlays(t, square) {
-  return t.andPlay(t => t.play('X', square).expect(`Player played an invalid move ${square}`));
+  return t.andPlay(t => t.play(square).expect(`Player played an invalid move ${square}`));
 }
 
 let randomAgent = new RandomAgent();
 
-function agentPlays(t, agentId, agent) {
+function agentPlays(t, agent) {
   return t.andPlay(t => {
     let action = agent.action(t);
-    return t.play(agentId, action)
-        .expect(`Agent ${agentId} chose an invalid action ${action}`);
+    return t.play(action)
+        .expect(`Agent ${agent} chose an invalid action ${action}`);
   });
 }
 
@@ -30,7 +30,7 @@ function render() {
 }
 
 tic_tac_toe = playerPlays(tic_tac_toe, 0);
-tic_tac_toe = agentPlays(tic_tac_toe, 'O', randomAgent);
+tic_tac_toe = agentPlays(tic_tac_toe, randomAgent);
 render();
 
 document.getElementById('3t-play').addEventListener('click', (event) => {
@@ -39,6 +39,6 @@ document.getElementById('3t-play').addEventListener('click', (event) => {
   inputElement.value = '';
 
   tic_tac_toe = playerPlays(tic_tac_toe, parseInt(input));
-  tic_tac_toe = agentPlays(tic_tac_toe, 'O', randomAgent);
+  tic_tac_toe = agentPlays(tic_tac_toe, randomAgent);
   render();
 });

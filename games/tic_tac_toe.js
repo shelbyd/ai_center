@@ -22,7 +22,11 @@ export class TicTacToe {
     ];
   }
 
-  play(pip, square) {
+  play(square) {
+    return this.playRaw(this.activePlayer(), square);
+  }
+
+  playRaw(pip, square) {
     let clone = this.clone();
     if (!clone.unplayed().includes(square)) {
       return new None();
@@ -61,6 +65,12 @@ ${t[6]} ${t[7]} ${t[8]}`;
     clone.array = this.array.slice();
     return clone;
   }
+
+  activePlayer() {
+    let xs = this.array.filter(v => v === 'X').length;
+    let os = this.array.filter(v => v === 'O').length;
+    return xs > os ? 'O' : 'X';
+  }
 }
 
 import {test, assert, assertEq} from '../test.js';
@@ -73,44 +83,49 @@ test('empty game can play anything', () => {
 
 test('one move played can no longer play that move', () => {
   let game = new TicTacToe()
-    .play('X', 0).unwrap().nonTerminal();
+    .play(0).unwrap().nonTerminal();
 
   assertEq(game.unplayed().length, 8);
   assert(!game.unplayed().includes(0));
   assert(game.unplayed().includes(1));
 
-  game = game.play('O', 1).unwrap().nonTerminal();
+  game = game.play(1).unwrap().nonTerminal();
 
   assert(!game.unplayed().includes(1));
 });
 
 test('attempting play over existing square is none', () => {
-  let game = new TicTacToe().play('X', 0).unwrap().nonTerminal();
+  let game = new TicTacToe().play(0).unwrap().nonTerminal();
 
-  assertEq(game.play('O', 0), new None());
+  assertEq(game.play(0), new None());
 });
 
 test('X wins', () => {
   let game = new TicTacToe()
-    .play('X', 0).unwrap().nonTerminal()
-    .play('X', 1).unwrap().nonTerminal()
-    .play('X', 2);
+    .playRaw('X', 0).unwrap().nonTerminal()
+    .playRaw('X', 1).unwrap().nonTerminal()
+    .playRaw('X', 2);
 
   assertEq(game, new Some(new Terminal(new Some('X'))));
 });
 
 test('draw', () => {
   let game = new TicTacToe()
-    .play('X', 0).unwrap().nonTerminal()
-    .play('X', 1).unwrap().nonTerminal()
-    .play('O', 2).unwrap().nonTerminal()
-    .play('O', 3).unwrap().nonTerminal()
-    .play('O', 4).unwrap().nonTerminal()
-    .play('X', 5).unwrap().nonTerminal()
-    .play('X', 6).unwrap().nonTerminal()
-    .play('X', 7).unwrap().nonTerminal()
-    .play('O', 8)
+    .play(0).unwrap().nonTerminal()
+    .play(2).unwrap().nonTerminal()
+    .play(1).unwrap().nonTerminal()
+    .play(3).unwrap().nonTerminal()
+    .play(5).unwrap().nonTerminal()
+    .play(4).unwrap().nonTerminal()
+    .play(6).unwrap().nonTerminal()
+    .play(8).unwrap().nonTerminal()
+    .play(7)
   ;
 
   assertEq(game, new Some(new Terminal(new None())));
+});
+
+test('active player', () => {
+  assertEq(new TicTacToe().activePlayer(), 'X');
+  assertEq(new TicTacToe().play(0).unwrap().nonTerminal().activePlayer(), 'O');
 });
