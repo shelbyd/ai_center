@@ -1,3 +1,5 @@
+import {Some, None} from '/option.js';
+
 export class TicTacToe {
   constructor() {
     this.array = [
@@ -7,8 +9,12 @@ export class TicTacToe {
 
   play(pip, square) {
     let clone = this.clone();
+    if (clone.array[square] !== '-') {
+      return new None();
+    }
+
     clone.array[square] = pip;
-    return clone;
+    return new Some(clone);
   }
 
   unplayed() {
@@ -28,3 +34,29 @@ ${t[6]} ${t[7]} ${t[8]}`;
     return clone;
   }
 }
+
+import {test, assert, assertEq} from '/test.js';
+
+test('empty game can play anything', () => {
+  let game = new TicTacToe();
+
+  assertEq(game.unplayed().length, 9);
+});
+
+test('one move played can no longer play that move', () => {
+  let game = new TicTacToe().play('X', 0).unwrap();
+
+  assertEq(game.unplayed().length, 8);
+  assert(!game.unplayed().includes(0));
+  assert(game.unplayed().includes(1));
+
+  game = game.play('O', 1).unwrap();
+
+  assert(!game.unplayed().includes(1));
+});
+
+test('attempting play over existing square is none', () => {
+  let game = new TicTacToe().play('X', 0).unwrap();
+
+  assertEq(game.play('O', 0), new None());
+});

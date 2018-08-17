@@ -4,14 +4,14 @@ import {TicTacToe} from './games/tic_tac_toe.js';
 let tic_tac_toe = new TicTacToe();
 
 function playerPlays(t, square) {
-  return t.play('X', square);
+  return t.play('X', square).unwrap();
 }
 
 function randomPlays(t) {
   let unplayed = t.unplayed();
   let square = randomSample(unplayed);
 
-  return t.play('O', square);
+  return t.play('O', square).unwrap();
 }
 
 function render() {
