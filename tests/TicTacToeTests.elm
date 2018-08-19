@@ -12,6 +12,7 @@ playAll actions ttt =
     actions |> List.foldl (Game.lift play) (NonTerminal ttt)
 
 
+suite : Test
 suite =
     concat
         [ test "empty game can play anything" <|
@@ -55,6 +56,6 @@ suite =
         , test "draw" <|
             \_ ->
                 ticTacToe
-                    |> playAll [0, 2, 1, 3, 5, 4, 6, 8, 7]
+                    |> playAll [ 0, 2, 1, 3, 5, 4, 6, 8, 7 ]
                     |> Expect.equal (Terminal Nothing)
         ]

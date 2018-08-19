@@ -5,6 +5,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Attributes exposing (value)
 
 
+main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model =
@@ -28,6 +29,7 @@ type Msg
     | Play
 
 
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         UpdateBoard board ->
@@ -40,6 +42,7 @@ update msg model =
             { model | play = Nothing }
 
 
+view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "AI Center" ]
