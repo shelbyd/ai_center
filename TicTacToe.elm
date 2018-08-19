@@ -55,11 +55,9 @@ play action ttt =
         newTtt =
             playRaw action ttt
     in
-        winningPatterns
-            |> List.filterMap (winner newTtt)
-            |> List.head
-            |> Maybe.map (\w -> Terminal (Just w))
-            |> Utils.maybeOrElse (asDraw newTtt)
+        newTtt
+            |> asTerminal
+            |> Maybe.map (Terminal)
             |> Maybe.withDefault (NonTerminal newTtt)
 
 
@@ -73,6 +71,22 @@ playRaw action ttt =
         { ttt | board = newBoard }
 
 
+asTerminal : TicTacToe -> Maybe (Maybe Player)
+asTerminal ttt =
+    let
+        maybeDraw =
+            if List.length (validActions ttt) == 0 then
+                Just Nothing
+            else
+                Nothing
+    in
+        winningPatterns
+            |> List.filterMap (winner ttt)
+            |> List.head
+            |> Maybe.map Just
+            |> Utils.maybeOrElse maybeDraw
+
+
 winner : TicTacToe -> List Int -> Maybe Player
 winner ttt pattern =
     pattern
@@ -80,14 +94,6 @@ winner ttt pattern =
         |> List.map (Maybe.withDefault Nothing)
         |> Utils.dedup
         |> Maybe.withDefault Nothing
-
-
-asDraw : TicTacToe -> Maybe TicTacToeState
-asDraw ttt =
-    if List.length (validActions ttt) == 0 then
-        Just (Terminal Nothing)
-    else
-        Nothing
 
 
 activePlayer : TicTacToe -> Player
