@@ -1,4 +1,13 @@
-module TicTacToe exposing (..)
+module TicTacToe
+    exposing
+        ( TicTacToe
+        , Action
+        , Player(..)
+        , activePlayer
+        , play
+        , ticTacToe
+        , validActions
+        )
 
 import Array exposing (Array)
 import Game exposing (..)
@@ -7,10 +16,6 @@ import Utils
 
 type alias TicTacToe =
     { board : Array (Maybe Player) }
-
-
-type alias TicTacToeState =
-    GameState TicTacToe Player
 
 
 type Player

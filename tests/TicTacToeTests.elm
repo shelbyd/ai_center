@@ -7,7 +7,7 @@ import Game exposing (..)
 import TicTacToe exposing (..)
 
 
-playAll : List Action -> TicTacToe -> TicTacToeState
+playAll : List Action -> TicTacToe -> GameState TicTacToe Player
 playAll actions ttt =
     actions |> List.foldl (Game.lift play) (NonTerminal ttt)
 
