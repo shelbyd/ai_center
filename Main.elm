@@ -1,16 +1,19 @@
 module Main exposing (..)
 
-import Html exposing (Html, button, div, text, pre, h1, input)
-import Html.Events exposing (onClick, onInput)
+import Array
+import Html exposing (Html, button, div, text, pre, h1, input, form)
+import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Attributes exposing (value)
+import Game exposing (GameState(..))
+import TicTacToe exposing (TicTacToe, Player)
 
 
 main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model =
-            { board = "- - -\n- - -\n- - -"
-            , play = Nothing
+            { gameState = (NonTerminal TicTacToe.ticTacToe)
+            , play = ""
             }
         , view = view
         , update = update
@@ -18,35 +21,81 @@ main =
 
 
 type alias Model =
-    { board : String
-    , play : Maybe String
+    { gameState : GameState TicTacToe Player
+    , play : String
     }
 
 
 type Msg
-    = UpdateBoard String
-    | ChangePlay String
+    = ChangePlay String
     | Play
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        UpdateBoard board ->
-            { model | board = board }
-
         ChangePlay string ->
-            { model | play = Just string }
+            { model | play = string }
 
         Play ->
-            { model | play = Nothing }
+            let
+                parsedPlay : Maybe Int
+                parsedPlay =
+                    model.play |> String.toInt |> Result.toMaybe
+
+                playAction : Int -> GameState TicTacToe Player
+                playAction action =
+                    Game.lift TicTacToe.play action model.gameState
+
+                newBoard =
+                    parsedPlay
+                        |> Maybe.map playAction
+                        |> Maybe.withDefault model.gameState
+            in
+                { model | play = "", gameState = newBoard }
 
 
 view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "AI Center" ]
-        , pre [] [ text model.board ]
-        , input [ value (Maybe.withDefault "" model.play), onInput ChangePlay ] []
-        , button [ onClick Play ] [ text "Play" ]
+        , pre [] [ text (ticTacToeString model.gameState) ]
+        , form [ onSubmit Play ]
+            [ input [ value model.play, onInput ChangePlay ] []
+            , button [] [ text "Play" ]
+            ]
         ]
+
+
+ticTacToeString : GameState TicTacToe Player -> String
+ticTacToeString state =
+    case state of
+        NonTerminal game ->
+            nonTerminalString game
+
+        Terminal (Just winner) ->
+            "Winner: " ++ (toString winner)
+
+        Terminal Nothing ->
+            "Draw"
+
+
+nonTerminalString : TicTacToe -> String
+nonTerminalString ttt =
+    let
+        cellString : Maybe Player -> String
+        cellString =
+            Maybe.map toString >> Maybe.withDefault "-"
+
+        getCell : Int -> Maybe Player
+        getCell i =
+            Array.get i ttt.board |> Maybe.withDefault Nothing
+
+        line : List Int -> String
+        line =
+            List.map (getCell >> cellString) >> String.join " "
+
+        pattern =
+            [ [ 0, 1, 2 ], [ 3, 4, 5 ], [ 6, 7, 8 ] ]
+    in
+        pattern |> List.map line |> String.join "\n"
