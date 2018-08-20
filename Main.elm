@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Array
-import Html exposing (Html, button, div, text, pre, h1, input, form)
+import Html exposing (Html, button, div, text, pre, h1, input, form, p)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Attributes exposing (value)
 import Game exposing (GameState(..))
@@ -14,6 +14,7 @@ main =
         { model =
             { gameState = (NonTerminal TicTacToe.ticTacToe)
             , play = ""
+            , error = Nothing
             }
         , view = view
         , update = update
@@ -23,6 +24,7 @@ main =
 type alias Model =
     { gameState : GameState TicTacToe Player
     , play : String
+    , error : Maybe String
     }
 
 
@@ -43,16 +45,27 @@ update msg model =
                 parsedPlay =
                     model.play |> String.toInt |> Result.toMaybe
 
-                playAction : Int -> GameState TicTacToe Player
+                playAction : Int -> Maybe (GameState TicTacToe Player)
                 playAction action =
-                    Game.lift TicTacToe.play action model.gameState
+                    Game.lift TicTacToe.play action (Just model.gameState)
 
                 newBoard =
                     parsedPlay
-                        |> Maybe.map playAction
-                        |> Maybe.withDefault model.gameState
+                        |> Maybe.andThen playAction
+
+                error =
+                    case newBoard of
+                        Just _ ->
+                            Nothing
+
+                        Nothing ->
+                            Just "Invalid action"
             in
-                { model | play = "", gameState = newBoard }
+                { model
+                    | play = ""
+                    , gameState = (Maybe.withDefault model.gameState newBoard)
+                    , error = error
+                }
 
 
 view : Model -> Html Msg
@@ -60,6 +73,7 @@ view model =
     div []
         [ h1 [] [ text "AI Center" ]
         , pre [] [ text (ticTacToeString model.gameState) ]
+        , p [] [ text (Maybe.withDefault "" model.error) ]
         , form [ onSubmit Play ]
             [ input [ value model.play, onInput ChangePlay ] []
             , button [] [ text "Play" ]

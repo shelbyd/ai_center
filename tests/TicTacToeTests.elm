@@ -7,9 +7,9 @@ import Game exposing (..)
 import TicTacToe exposing (..)
 
 
-playAll : List Action -> TicTacToe -> GameState TicTacToe Player
+playAll : List Action -> TicTacToe -> Maybe (GameState TicTacToe Player)
 playAll actions ttt =
-    actions |> List.foldl (Game.lift play) (NonTerminal ttt)
+    actions |> List.foldl (Game.lift play) (Just (NonTerminal ttt))
 
 
 suite : Test
@@ -52,10 +52,15 @@ suite =
             \_ ->
                 ticTacToe
                     |> playAll [ 0, 3, 1, 4, 2 ]
-                    |> Expect.equal (Terminal (Just X))
+                    |> Expect.equal (Just (Terminal (Just X)))
         , test "draw" <|
             \_ ->
                 ticTacToe
                     |> playAll [ 0, 2, 1, 3, 5, 4, 6, 8, 7 ]
-                    |> Expect.equal (Terminal Nothing)
+                    |> Expect.equal (Just (Terminal Nothing))
+        , fuzz (intRange 0 8) "playing an action twice is invalid" <|
+            \action ->
+                ticTacToe
+                    |> playAll [ action, action ]
+                    |> Expect.equal Nothing
         ]

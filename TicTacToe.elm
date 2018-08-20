@@ -33,7 +33,7 @@ ticTacToe =
     }
 
 
-winningPatterns: List (List Int)
+winningPatterns : List (List Int)
 winningPatterns =
     [ [ 0, 1, 2 ]
     , [ 3, 4, 5 ]
@@ -55,16 +55,22 @@ validActions ttt =
         |> Array.toList
 
 
-play : Action -> TicTacToe -> GameState TicTacToe Player
+play : Action -> TicTacToe -> Maybe (GameState TicTacToe Player)
 play action ttt =
-    let
-        newTtt =
-            playRaw action ttt
-    in
-        newTtt
-            |> asTerminal
-            |> Maybe.map (Terminal)
-            |> Maybe.withDefault (NonTerminal newTtt)
+    case Array.get action ttt.board of
+        Just (Just _) ->
+            Nothing
+
+        _ ->
+            let
+                newTtt =
+                    playRaw action ttt
+            in
+                newTtt
+                    |> asTerminal
+                    |> Maybe.map (Terminal)
+                    |> Maybe.withDefault (NonTerminal newTtt)
+                    |> Just
 
 
 playRaw : Action -> TicTacToe -> TicTacToe
